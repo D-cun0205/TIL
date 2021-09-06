@@ -88,7 +88,7 @@ Layout : 로깅 정보의 형식을 지정하는데 사용되ㅑ는 레이아웃
     TRACE			: 상세한 정보
     ALL                     : 모든 정보
 
-### Console 및 File로 Logging 테스트 시 설정했던 XML 파일
+### Console 및 File로 Logging 테스트 시 설정했던 XML 파일 (Log4j)
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE log4j:configuration PUBLIC "-//APACHE//DTD LOG4J 1.2//EN" "log4j.dtd">
@@ -98,13 +98,6 @@ Layout : 로깅 정보의 형식을 지정하는데 사용되ㅑ는 레이아웃
 		<layout class="org.apache.log4j.PatternLayout">
 			년월일 시분초의 형식-로그레벨-클래스명-호출라인수-로그메시지-줄바꿈의 형식으로 만들어 달라는 패턴
 			<param name="ConversionPattern" value="%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n" />
-
-			<!-- 인코더 사용 가능
-		        <encoder>
-			        <charset>UTF-8</charset>
-		        	<Pattern>${layoutPattern}</Pattern>
-		        </encoder>
-	        -->
 		</layout>
 	</appender>
 
@@ -133,3 +126,51 @@ Layout : 로깅 정보의 형식을 지정하는데 사용되ㅑ는 레이아웃
 ####appender의 param에 설정된 maxBackupIndex가 초과 될 경우
     31번부터 199번의 로그만 남아있고 오래된 log는 삭제되어있다.
 ![](img/logtest1.jpg)  
+
+###Logback XML 설정파일
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration debug="true">
+
+	<contextName>demo</contextName>
+    
+    <!-- 파일에서 사용 할 path -->
+	<property name="logHome" value="./logs" />
+
+    <!-- 콘솔에 로그 메시지 출력 -->
+	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <!-- encoder = 로그이벤트 > 바이트 배열 > OutputStream -->
+		<encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+			<pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n</pattern>
+		</encoder>
+	</appender>
+
+    <!-- 파일에 로그 메시지 출력 -->
+    <!-- RollingFileAppender : 로그의 크기가 설정한 용량 이상이되면 새로운인덱스로 파일을 추가 생성하여 로그를 쌓음 -->
+	<appender name="fileAppender" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+			<level>DEBUG</level>
+		</filter>
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<fileNamePattern>${logHome}/%d{yyyyMMdd}/vending.%d{yyyyMMdd}.%i.log</fileNamePattern>
+			<timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+				<maxFileSize>15MB</maxFileSize> <!-- 다음파일을 생성하기위한 max size -->
+			</timeBasedFileNamingAndTriggeringPolicy>
+		</rollingPolicy>
+
+		<encoder>
+			<pattern>
+				%d{yyyy-MM-dd HH:mm:ss.SSS} %thread %-5level %logger - %m%n
+			</pattern>
+		</encoder>
+	</appender>
+
+	<appender name="errorLogMonitorAppender" class="com.ErrorLogMonitorAppender"></appender>
+
+	<logger name="com.example.demo" level="INFO" />
+	<root level="info">
+		<appender-ref ref="STDOUT" />
+		<appender-ref ref="fileAppender" />
+	</root>
+</configuration>
+```
