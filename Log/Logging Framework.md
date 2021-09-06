@@ -50,6 +50,7 @@ Layout : 로깅 정보의 형식을 지정하는데 사용되ㅑ는 레이아웃
     XMLLayout  
 
 ###지원객체
+
     Level Object : 우선순위, 세부정보, 정밀도를 정의하며 7가지의 Level로 관리할 수 있다
     Filter Object : 분석 및 기록 여부에 대한 추가 설정
     ObjectRenderer : 문자열타입이아닌 객체타입에 대한 로깅처리를 위한 인터페이스
@@ -57,6 +58,7 @@ Layout : 로깅 정보의 형식을 지정하는데 사용되ㅑ는 레이아웃
 
 
 ###pattern option
+
     %logger{length}	        : logger name을 표시하는데 %logger(10)이면 10글자 알아서 축약해서 보여줌 &#160;&#160;&#160;&#160;&#160;ex) lims.req.service.Impl.RequestMServiceImpl
     %thread			: thread name print
     %-5level 		: log level print -5는 고정 출력폭임 ex) [debug ], [trace] debug4글자 + 빈칸1 추가됨
@@ -76,6 +78,7 @@ Layout : 로깅 정보의 형식을 지정하는데 사용되ㅑ는 레이아웃
     %r 			: 애플리케이션 시작 이후부터 로깅이 발생한 시점까지의 시간
 
 ### Log Level
+
     OFF                     : 가장 높은 순위, 로깅 해제(Log4j 2버전)
     FATAL			: 조기 종료를 유발하는 심각한 오류
     ERROR			: 런타임 오류, 예기치 않은 조건
