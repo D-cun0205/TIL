@@ -100,4 +100,3 @@ member.setUsername("회원1");
             ㄴcatalog란 데이터베이스의 메타데이터 (테이블, 뷰 테이블, 동의어, 인덱스 등등 DB개체들이 저장되어있다)
         ㄴ(속성)schema : schema 기능이 있는 데이터베이스의 schema를 매핑
         ㄴ(속성)uniqueConstraints : DDL생성 시 유니크제약조건 생성, 스키마 자동 생성시에만 사용
-    
