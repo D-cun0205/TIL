@@ -46,3 +46,20 @@ PasswordEncoding
 GrantedAuthority
 
     사용자의 권한
+
+Spring 실행 순서
+
+    BeanNameAware's setBeanName
+    BeanClassLoaderAware's setBeanClassLoader
+    BeanFactoryAware's setBeanFactory
+    EnvironmentAware's setEnvironment
+    EmbeddedValueResolverAware's setEmbeddedValueResolver
+    ResourceLoaderAware's setResourceLoader
+    ApplicationEventPublisherAware's setApplicationEventPublisher
+    MessageSourceAware's setMessageSource
+    ApplicationContextAware's setApplicationContext
+    ServletContextAware's setServletContext
+    postProcessBeforeInitialization methods of BeanPostProcessors
+    InitializingBean's afterPropertiesSet (here!)
+    a custom init-method definition
+    postProcessAfterInitialization methods of BeanPostProcessors
