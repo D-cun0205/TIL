@@ -1,21 +1,25 @@
-#Data Base Connection Pool 정리
+## Data Base Connection Pool 정리
 
-###TCP
+### TCP
+
     -Transmission Control Protocol의 약어
     -클라이언트와 서버간에 데이터를 신뢰성 있게 전달하기 위한 프로토콜
     -데이터 전송을 위해 사전 연결을 만들기 위한 연결 지향 프로토콜
     -네트워크 데이터 전달 과정 중 주객전도, 손실 될 경우 순서 재조합과 교정 가능 
 
-###TCP 3-way Handshake Process
+### TCP 3-way Handshake Process
+
     -안전하고 신뢰할 수 있는 통신 링크를 작성하며 TCP에서 실행되는 미리 정의된 단계
     -연결 설정 및 연결 해제 또한 3-way handshake 프로세스를 수행
     -SYN : Synchronize Sequence Numbers(동기화순번)
     -ACK : acknowledgment(승인)
 
-###TCP 수행 과정
+### TCP 수행 과정
+
 ![](img/3way_handshaking.jpg)
 
-###Connection Pool
+### Connection Pool
+
     클라이언트의 요청(쿼리)에 앞서 TCP 3-way Handshake가 선행되어 데이터의 입출력을 행하는데
     지속적인 요청에 3-way Handshake가 반복적으로 실행되면 네트워크 구간의 성능이 제한 될 수 있다
     MYSQL 기준 쿼리 수행시 가장 많은 비용이 Connecting에서 발생된다고 한다
@@ -23,7 +27,8 @@
     기존 클라이언트의 요청을 빠르게 통신 할 수 있게되며 비용을 절감한다
     정리하면 반복적인 Connection으로 인한 비싼 비용을 Connection Pool로 절감한다
 
-###Thread Get Connection (Hikari CP 기준)
+### Thread Get Connection (Hikari CP 기준)
+
     클라이언트의 요청으로 인한 Thread가 Connection Pool에 Connection을 요청한다
     1.Thread가 사용했던 Connection 체크
     2.Thread가 사용했던 Connection들의 대기 상태인 Connection 존재 여부 확인
@@ -34,24 +39,27 @@
         ㄴTimeOut 설정 시 대기시간이 오버되면 Exception 발생
     7.최종적으로 Thread가 Connection을 반납하면 Connection Pool이 사용내역을 기록
 
-###WAS Thread and Connection Count
+### WAS Thread and Connection Count
+
     Connection의 사용 주체는 Thread이며 Thread의 개수가 Connection의 수보다 작을 경우
     사용되지 않은 Connection들은 메모리 공간만 차지하는 예쁜쓰레기
     Thread의 개수를 무한정 늘릴경우 Context Switching의 한계 발생
     * Context Switching : 현재 진행하고 있는 Task(Process, Thread)의 상태를 저장하고 다음 진행할 Task의 상태 값을 읽어 적용하는 과정
     Thread와 Connection의 수를 같이 늘릴경우 Disk의 병목으로 인해 큰 효과를 가지기 어려움
 
-###Hikari CP Connection Pool Best Size
+### Hikari CP Connection Pool Best Size
+
     connections = ((core_count * 2) + effective_spindle_count)
     커넥션 수 = ((CPU * 2) + 하드디스크)
     이상적인 쓰레드 개수는 CPU 수와 동일하다고는 하나 데이테베이스의 처리(Dist I/O, DRAM) 보다 CPU가 월등히 빠르기 때문에
     Thread의 Blocking 되는 시간에 다른 쓰레드의 작업을 진행하여 처리 할 수 있는 여유를 가지므로 * 2 를 지정
 
-###Connection Pool 종류
+### Connection Pool 종류
 
     Commons DBCP, Tomcat-JDBC, BoneCP, HikariCP ...
 
-###HikariCP 설정
+### HikariCP 설정
+
     autoCommit: Pool에서 반환된 Connection의 자동 커밋 제어(default: true)
     connectionTimeout: pool에서 커넥션을 얻기위해 대기하는 최대 시간
         ㄴ 대기시간 초과시 SQLException 발생. minimum set : 250ms, default: 30000ms(30초)
