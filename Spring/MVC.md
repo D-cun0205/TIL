@@ -2,7 +2,7 @@
 
 ---
 
-웹 프레젠테이션 계층 : 사용자 또는 클라이언트 시스템과 연동하는 책임
+#### 웹 프레젠테이션 계층 : 사용자 또는 클라이언트 시스템과 연동하는 책임
 
 * 스프링 웹 프레임 워크
   * 스프링 서블릿/스프링 MVC
@@ -12,7 +12,9 @@
     스프링 서블릿/스프링 MVC 는 스프링이 직접 제공하는 서블릿 기반의 MVC 프레임워크다
     프론트 컨트롤러 역할의 핵심 엔진으로 DispatcherServlet를 사용하며 다양한 종류의 컨트롤러를 동시에 사용 가능
 
-DispatcherServlet과 MVC 아키텍처
+#### DispatcherServlet과 MVC 아키텍처
+
+DispatcherServlet : 스프링 MVC 가 프론트 컨트롤러로 사용하는 서블릿
 
 * 작업 흐름
   * DispatcherServlet의 HTTP 요청 접수
@@ -68,3 +70,152 @@ DispatcherServlet과 MVC 아키텍처
 
     HttpServletResponse를 돌려줄 때 후 처리기가 있으면 후속 작업을 진행하고 최종 결과를 서블릿 컨테이너에 전달
     서블릿 컨테이너는 HttpServletResponse에 담긴 정보를 HTTP 응답으로 만들어 클라이언트에게 전송하고 작업 종료
+
+#### DispatcherServlet의 DI 가능한 전략
+
+* DI 전략 종류
+  * HandlerMapping
+  * HandlerAdapter
+  * HandlerExceptionResolver
+  * ViewResolver
+  * LocalResolver
+  * ThemeResolver
+  * RequestToViewNameTranslator
+
+HandlerMapping
+
+    URL, 요청 정보를 기준으로 어떤 핸들러 오브젝트, 즉 사용할 컨트롤러 결정
+    DispatcherServlet은 하나 이상의 핸들러를 가질 수 있다
+    디폴트로 BeanNameUrlHandlerMapping, DefaultAnnotationHandlerMapping 설정
+
+HandlerAdapter
+
+    핸들러 매핑으로 선택한 핸들러(컨트롤러)를 DispatcherServlet이 호출할 때 사용
+    핸들러(컨트롤러) 호출 방법은 타입에 따라 다르며 DispatcherServlet은 타입을 알 수 없는데
+    컨트롤러 타입에 적합한 adapter를 통해 핸들러(컨트롤러)를 호출 해준다
+    디폴트로 HttpRequestHandlerAdapter, SimpleControllerHandlerAdapter, AnnotationMethodHandlerAdapter 설정
+
+    자주 사용하는 @RequestMapping, @Controller 를 통해 정의되는 컨트롤러는
+    DefalutAnnotationHandlerMapping 에 의 해 핸들러 결정되고 그에 대응되는 AnnotationMethodHandlerAdapter에 의해 호출 된다
+
+HandlerExceptionResolver
+
+    DispatcherServlet은 HandlerExceptionResolver 중에서 발생한 예외에 적합한 것을 찾아서 예외처리 위임
+    디폴트로 AnnotationMethodHandlerExceptionResolver, ResponseStatusExeptionResolver, DefaultHandlerExceptionResolver 설정
+
+ViewResolver
+
+    컨트롤러가 리턴한 뷰 이름을 참고해서 적절한 뷰 오브젝트를 찾는다
+    디폴트로 InternalResourceViewResolver 설정, JSP나 서블릿에 리소스를 뷰로 사용
+    뷰의 종류는 다양하며 뷰의 종류에 따라 적잘한 view Resolver를 추가로 설정 가능
+
+LocaleResolver
+
+    지역정보 결정 전략, 디폴트로 AcceptHeaderLocaleResolver 설정
+    Http 헤더 정보를 보고 지역정보 설정, 세션 or URL 파라미터, 쿠키 등 다양한 방식으로 설정 변경 가능
+
+ThemeResolver
+
+    테마를 통해 사이트를 구성하는 케이스 잘 사용되지 않는다
+
+RequestToViewNameTranslator
+
+    컨트롤러에서 이름을 제공하지 않은 경우 요청정보로 뷰 이름을 자동 생성해주는 전략
+    디폴트로 DefaultRequestToViewNameTranslator 설정
+
+### @MVC
+
+---
+
+@MVC 의 특징으로 핸들러 매핑과 핸들러 어댑터의 대상은 오브젝트가 아닌 메소드 이다
+
+#### @RequestMapping 핸들러 매핑
+
+    @MVC는 디폴트로 DafaultAnnotationHandlerMapping 설정 되어 있으며 이 핸들러 매핑은 @RequestMapping 어노테이션을 활용한다
+    @RequestMapping 은 타입 레벨, 메소드 레벨을 설정할 수 있고 2가지 매핑정보를 활용하여 최종 매핑정보 생성 한다
+    타입 레벨의 @RequestMapping 정보를 기준하고 메소드 레벨의 매핑은 더 세분화시 사용
+
+@RequestMapping 어노테이션
+
+* @RequestMapping 엘리먼트
+  * String[] value(): URL 패턴
+  * RequestMethod[] method(): HTTP 요청 메소드
+  * String[] params(): 요청 파라미터
+  * String[] headers(): HTTP 헤더
+
+String[] value(): URL 패턴
+
+    디폴트 엘리먼트이며 스트링 배열 타입으로 URL 패턴을 지정한다
+    ANT 스타일의 와일드카드를 사용할 수 있다 ex) @RequestMapping("/admin/**/user")
+    {} 를 사용하는 URI 템플릿을 사용 할 수 있으며 {userid} 안에 들어가는 속성을 패스 변수라고 부른다
+    @RequestMapping({/hello", "/hi"}) 하나 이상의 URL 패턴도 지정 가능
+    URL 패턴은 디폴트 접미어 패턴이 적용된다
+    ex) @RequestMapping("/hello") >> @RequestMapping({"/hello", "/hello/", "/hello.*"}) 와 같다
+
+RequestMethod[] method(): HTTP 요청 메소드
+
+    HTTP 메소드를 정의한 ENUM
+    GET, HEAD, POST, PUT, DELETE, OPTIONS, TRACE 7개의 HTTP 메소드 정의
+    URL이 같아도 메소드에 따라 호출되는 메소드가 다르도록 매핑할 수 있다
+    ex) @RequestMapping(value="/user/add". method=RequestMethod.GET)
+    ex) @RequestMapping(value="/user/add". method=RequestMethod.POST)
+
+String[] params(): 요청 파라미터
+
+    타입=값 형식으로 매핑할 수 있다
+
+String[] headers(): HTTP 헤더
+
+    HTTP 헤더 매핑이며 아래와 같이 매핑시킬수 있다
+    ex) @Requestmapping(value ="/view", headers="content-type=text/*")
+
+타입 레벨 매핑과 메소드 레벨 매핑의 결합
+
+    타입(클래스, 인터페이스) 레벨에 붙는 @RequestMapping은 타입 내의 모든 매핑 메소드의 공통 조건 지정으로 사용
+    메소드 레벨의 매핑은 세분화로 사용
+
+
+```java
+//두 개의 매핑 결합 예
+@RequestMapping("/ctrl")
+public class controller {
+    
+    @RequestMapping("/add")
+    public String add() {
+        return "";
+    }
+
+    @RequestMapping("/edit")
+    public String edit() {
+        return "";
+    }
+}
+```
+
+메소드 레벨 단독 매핑
+
+    메소드 레벨에 독립적으로 매핑정보를 지정 하면 타입 레벨에는 조건이 없는 @RequestMapping 을 붙이면 된다
+    타입 레벨에 @RequestMapping 을 적용하지 않으면 해당 클래스는 매핑 대상이 되지 않아서 메소드의 매핑도 무시된다
+    그러나 컨틀롤러 클래스에 @Controller 어노테이션을 붙이면 @RequestMapping 을 생략할 수 있다
+
+```java
+//메소드 레벨의 매핑만 사용하는 예
+@Controller
+public class controller {
+    
+    @RequestMapping("/add")
+    public String add() {
+        return "";
+    }
+
+    @RequestMapping("/edit")
+    public String edit() {
+        return "";
+    }
+}
+```
+
+타입 레벨 단독 매핑
+
+    @RequestMapping 을 타입에 지정할 떄 ex) @RequestMapping("/user/*") 로 입력하고
+    메소드 단위에 입력 값 없는 @RequestMapping을 사용하면 method name을 사용하여 매핑 한다
