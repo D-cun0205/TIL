@@ -219,3 +219,137 @@ public class controller {
 
     @RequestMapping 을 타입에 지정할 떄 ex) @RequestMapping("/user/*") 로 입력하고
     메소드 단위에 입력 값 없는 @RequestMapping을 사용하면 method name을 사용하여 매핑 한다
+
+#### 타입 상속과 매핑
+
+@RequestMapping 의 정보는 상속되며 서브클래스에서 @RequestMapping 을 재정의하면   
+슈퍼클래스의 매핑정보는 무시된다 인터페이스와 구현 클래스에 대한 @RequestMapping 도 위와 동일하게 적용 된다
+
+매핑정보 상속의 종류
+
+* 상위 타입과 메소드의 @RequestMapping 상속
+* 상위 타입의 @RequestMapping과 하위 타입 메소드의 @RequestMapping 결합
+* 상위 타입 메소드의 @RequestMapping 과 하위 타입의 @RequestMapping 결합
+* 하위 타입과 메소드의 @RequestMapping 재정의
+* 서브클래스 메소드의 URL 패턴 없는 @RequestMapping 재정의
+
+
+상위 타입과 메소드의 @RequestMapping 상속
+
+    클래스 상속의 경우 모든 매핑정보를 서브클래스가 물려 받는다
+
+```java
+@RequestMapping("/user")
+public class Super { 
+    @RequestMapping("/list")
+    public String list() {}
+}
+
+public class Sub extends Super {
+    //Super 클래스의 list를 오버라이드 하면 매핑정보도 같이 사용
+    //상속 깊이와 상관없이 매핑정보를 물려 받는다
+    //클래스가 아닌 인터페이스 구현도 동일하다
+}
+```
+
+상위 타입의 @RequestMapping과 하위 타입 메소드의 @RequestMapping 결합
+
+    슈퍼클래스는 타입에만 서브클래스는 메소드에만 @RequestMapping 을 적용한 경우
+
+```java
+@RequestMapping("/user")
+public class Super {}
+
+public class Sub extends Super {
+    //Sub 클래스는 Super의 타입에 설정되어있는 @RequestMapping 을 상속한다
+    //그러므로 위의 예시와 사용은 동일하다 /user/list로 접근하여 사용할 수 있다
+    @RequestMapping("/list")
+    public void list() {}
+}
+```
+
+상위 타입 메소드의 @RequestMapping 과 하위 타입의 @RequestMapping 결합
+
+    위 예시의 반대 조건이며 사용 방법은 동일하다
+    /user/list 에 의해 실행되는 메소드는 오버라이드 한 서브클래스 메소드다
+
+하위 타입과 메소드의 @RequestMapping 재정의
+
+    상위 클래스의 타입과 메소드에 @RequestMapping 설정
+    하위 클래스는 상위 클래스를 상속받고 타입과 오버라이드한 메소드에 @RequestMapping 재정의
+
+```java
+@RequestMapping("/superClass")
+public class Super {
+    @RequestMapping("/category")
+    public String list() {}
+}
+
+//서브 클래스에서 타입과 메소드를 재정의하면 상위 클래스에서 선언한 매핑정보는 모두 무시된다
+//상위 클래스 매핑에서 속성으로 Method 값을 주고 서브에서는 속성 값을 주지 않았을 경우에도
+//상위 클래스의 속성값을 상속받지 않고 새로 재정의 한다
+@RequestMapping("/subClass")
+public class Sub extends Super {
+    @RequestMapping("/list")
+    public String list() {}
+}
+```
+
+서브클래스 메소드의 URL 패턴 없는 @RequestMapping 재정의
+
+    상위 클래스의 메소드에 @RequestMapping 이 설정되어 있다
+    서브 클래스의 메소드에도 @RequestMapping 이 설정되어 있지만 URL 속성값이 없다
+    이런 경우에는 부모클래스의 URL 속성값을 그대로 물려받아서 사용한다
+    이러한 특성을 이용해 메소드 타입을 결합할 수 있는데 스프링 문서에도 없는 사용법이며 사용을 권하지 않는다
+
+#### 제네릭스와 매핑정보 상속을 이용한 컨트롤러 작성
+
+```java
+public abstract class GenericController<T, K, S> {
+    S service;
+    
+    @RequestMapping("/add")
+    public void add(T entity) {
+      //service...
+    }
+    @RequestMapping("/view")
+    public T view(K id) {}
+    //...
+}
+
+//추상 제네릭 컨트롤러에 없는 메소드는 추가하여 사용할 수 있다
+//추가한 메소드에는 별도로 @RequestMapping 을 선언하여 사용할 수 있다
+@RequestMapping("/user")
+public class controller extends GenericController<User, Integer, UserService> {}
+```
+
+#### @Controller
+
+고정된 메인 페이지를 출력하는 경우에 사용하는 스타일
+
+```java
+@Controller
+public class UserController {
+    //컨트롤러에 의해 실행된 메소드는 파라미터도 없고 리턴 값도 없다
+    //리턴 값이 없는 메소드는 스프링이 비어 있는 모델 오브젝트와 뷰 이름을 돌려준다
+    //뷰 이름은 RequestToViewNameTranslator 에 의해 URL 을 따라서 hello 로 생성 된다
+    @RequestMapping("/hello")
+    public void hello() {}
+}
+```
+
+```java
+@Controller
+public class UserController {
+    //HttpServletRequest 를 가져와서 쿠키값을 가져오는 방법을 @CookieValue 로 대체
+    //HTTP 요청의 name 으로 값을 가져오는 방법을 @RequestParam으로 대체
+    //ModelAndView 오브젝트를 생성해서 리턴해야하는 부분을 ModelMap 과 return String 으로 대체
+    //return 에 문자열을 입력하면 스프링 관례에 따라 뷰 네임으로 설정한다
+    @RequestMapping("/complex")
+    public String complex(@RequestParam("name") String name,
+                          @CookieValue("auth") String auth, ModelMap model) {
+        model.put("info", name + "/" + auth);
+        return "myview";
+    }
+}
+```
