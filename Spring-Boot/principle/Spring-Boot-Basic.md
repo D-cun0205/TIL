@@ -23,3 +23,19 @@ Spring Boot 를 사용하기 위해서는 JDK 8 이상 부터 사용할 수 있�
     <spring.version>5.0.6.RELEASE</spring.version>
 </properties>
 ```
+
+Spring Boot 에 의해 자동 추가된 라이브러리 제거하는 방법
+
+```xml
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-web</artifactId>
+    <!-- exclusions 사용하여 세부 라이브러리 제거 -->
+    <exclusions>
+        <exclusion>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-tomcat</artifactId>
+        </exclusion>
+    </exclusions>
+</dependency>
+```
