@@ -196,3 +196,78 @@ public class SpringDemoApplicationTest {
 
 #### Leo4j
 
+```
+docker run -p 7474:7474 -p 7687:7687 --name neo4j_boot -d neo4j
+```
+
+```properties
+spring.data.neo4j.uri=bolt://localhost:7687
+spring.data.neo4j.username=neo4j
+spring.data.neo4j.password=1111
+```
+
+```xml
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-data-neo4j</artifactId>
+</dependency>
+```
+
+```java
+@NodeEntity
+public class Account {
+    @Id @GeneratedValue
+    private Long id;
+    private String username;
+    private String userEmail;
+
+    @Relationship
+    private Set<Role> roleSet = new HashSet<>();
+
+    //getter, setter...
+}
+
+@NodeEntity
+public class Role {
+
+    @Id @GeneratedValue
+    private Long id;
+    private String grade;
+
+    //getter, setter...
+}
+
+@Component
+public class Neo4jAppliationRunner implements ApplicationRunner {
+
+    @Autowired
+    SessionFactory sessionFactory;
+
+    @Autowired
+    AccountRepository accountRepository;
+
+    @Override
+    public void run(ApplicationArguments args) throws Exception {
+        Account account = new Account();
+        account.setUsername("neo4j");
+        account.setUserEmail("neo4j@email.co.kr");
+
+        Role role = new Role();
+        role.setGrade("admin");
+
+        account.getRoleSet().add(role);
+
+        accountRepository.save(account);
+
+        Optional<Account> byId = accountRepository.findById(account.getId());
+        System.out.println(byId.get().getUsername());
+        System.out.println(byId.get().getUserEmail());
+
+        Session session = sessionFactory.openSession();
+        session.save(account);
+        sessionFactory.close();
+
+        System.out.println("finished");
+    }
+}
+```
