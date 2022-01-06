@@ -92,10 +92,10 @@ public class PersonFormatter implements Formatter<Person> {
 TEST
 
     Spring Boot 기준 Formatter 를 빈으로 등록하고 @WebMvcTest 를 진행하면
-    error 가 발생하는데 이유는 WebMvcTest 는 슬라이스 테스트로 Web 에 관련된 빈만 등록
+    error 가 발생하는데 이유는 @WebMvcTest 는 슬라이스 테스트로 Web 에 관련된 빈만 등록
     그러므로 Formatter에 대한 빈을 추가하지 않으므로 등록된 Formatter가 없어서 에러가 발생
-    해결방법으로 @AutoConfigureMockMvc 를 추가하여 Formatter를 빈으로 자동주입 받거나
-    @SpringBootTest 를 사용하여 전체를 빈으로 등록하고 테스트하여 해결 가능하다
+    해결방법으로 @SpringBootTest 를 사용하여 전체를 빈으로 등록하고 
+    @AutoConfigureMockMvc 를 import 하고 mockMvc 주입받아서 테스트할 수 있다 
 
 ```java
 @RunWith(SpringRunner.class)
