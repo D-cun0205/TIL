@@ -2,8 +2,6 @@
 
 ---
 
-    HttpSecurity.sessionManagement : 세션 관리 기능 작동
-
 동시 세션 제어
 
 ```java
@@ -66,3 +64,32 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     }
 }
 ```
+
+#### SessionManagementFilter
+
+    세션 관리 : 인증 시 사용자의 세션정보 등록, 조회, 삭제를 통해 관리
+    동시적 세션 제어 : 동일 계정 접속 허용 세션수 제한
+    세션 고정 보호 : 인증할 때 쿠키값을 새로 생성, 변경하여 해커의 공격을 방지
+    세션 생성 정책 : 항상 생성, 필요시 생성, 생성하지 않고 있을 경우 사용, 생성하지 않고 사용하지 않음
+
+#### ConcurrentSessionFilter
+
+    매 요청 현재 사용자 세션이 만료되어야 하는지 체크하고 세션 만료 처리
+
+Flow
+
+    ConcurrentSessionControlAuthenticationStrategy (1) 동시적 세션 처리 전략, 로그인 하려는 사용자의 세션 수 확인
+    ChangeSessionIdAuthenticationStrategy (2) 세션 고정 보호 처리 전략, 디폴트 설정으로 변경할 세션 ID를 생성한다
+    RegisterSessionAuthenticationStrategy (3) 세션 등록 전략, 변경한 세션 정보를 등록 
+ 
+    UsernamePasswordAuthenticationFilter 에서 CompositeSessionAuthenticationStrategy 호출
+    delegate.onAuthentication() 를 호출하여 delegate 에 들어있는 전략 순서대로(위에 작성 되어있는 순번) 실행
+    첫번째 동시적 세션 처리 단계 세션 수 체크 (ConcurrentSessionControlAuthenticationStrategy)
+    세션 수 초과, 인증 실패 전략 인 경우 SessionAuthenticationException 리턴
+    세션 수 초과, 세션 만료 전략 인 경우 allowableSessionExceeded() 호출하고 session(기존 세션).expireNo() 로 만료 시킨 후 다음 전략 호출
+    두번째 세션 고정 보호 단계 (ChangeSessionAuthenticationStategy : AbstractSessionFixationProtectionStrategy 추상클래스 타입)
+    ChangeSessionAuthenticationStategy 클래스 super.onSessionChange() 호출 하여 기존 세션을 새로운 세션으로 변경
+    세번째 세션 정보 등록 단계 (RegisterSessionAuthenticationStrategy : SessionAuthenticationStrategy 인터페이스 타입)
+    this.sessionRegistry(SessionRegistry 타입 : SessionRegistryImpl).registerNewSession() 호출 하여 정보 등록
+    세번째 단계까지 거친 후 기존 세션은 만료되고 기존 세션 사용자가 서버에 자원을 요청할 때 ConcurrentSessionFilter 에서 
+    session.isExpired() 로 세션 만료 체크 한 후 기존 세션은 만료되었으므로 logout & response 처리 한다 
