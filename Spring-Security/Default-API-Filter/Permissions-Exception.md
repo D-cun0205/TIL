@@ -74,3 +74,26 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 Flow
 
+    사용자의 요청을 인증, 인가 처리를 하기위해 FilterSecurityInterceptor 클래스가 가로채고
+    가로챈 요청을 처리하기 위해 ExceptionTranslationFilter 에 요청 내용을 전달한다
+    위 필터는 AuthenticationException(인증 예외), AccessDeniedException(인가 예외) 작업을 진행하는데
+
+    첫번째 예시로 user 권한을 가진 인증 된 사용자가 request (/admin) 요청한 경우 접근 권한이 없으므로
+    FilterSecurityInterceptor - ExceptionTranslationFilter - AccessDeniedException 
+    AccessDeniedException 은 AccessDeniedHandler 를 호출하여 하나의 핸들을 처리하고
+    일반적으로 처리하는 방법은 response.redirect 로 accessDenied 에 대한 처리 핸들러로 보낸다
+
+    두번째 예시로 인증 처리하지 않은 익명 사용자, rememberMe 의 request(/admin) 요청한 경우
+    FilterSecurityInterceptor - ExceptionTranslationFilter - AccessDeniedException 처리를 진행하는데
+    isAnonymous, isRememberMe 분기처리에 걸려서 AuthenticationException 으로 전달된다
+    AuthenticationException 은 두가지 처리를 진행하는데
+    하나는 AuthenticationEntryPoint 에서 response.redirect("/login") 핸들러로 보내고
+    다른 하나는 익명 사용자 또는 rememberMe 사용자의 요청 관련 정보를 세션에 저장해두고 로그인하여 인증이 완료되면
+    세션에서 요청 url을 가져와서 해당 url 핸들러에 매핑한다
+    
+#### CSRF
+
+    Cross Site Request Forgercy (사이트 간 요청 위조)
+    security 의존성을 추가하면 csrf 가 자동으로 설정되며
+    사용하고 싶지 않은 경우 HttpSecurity.csrf().disabled() 설정으로
+    FilterProxyChain 에서 제외 시킬 수 있다
