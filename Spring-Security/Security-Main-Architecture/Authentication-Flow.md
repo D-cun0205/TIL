@@ -7,6 +7,7 @@ Client
 UsernamePasswordAuthenticationFilter
 
     (인증 전)Authentication 객체를 생성하여 id, password 를 저장하여 전달
+    (인증 후)Authentication 객체를 SecurityContext 에 저장
 
 AuthenticationManager
 
