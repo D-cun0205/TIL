@@ -57,3 +57,10 @@ class SecondSecurityConfig extends WebSecurityConfigurerAdapter {
     배열 index 1 은 모든 요청에 인증, 인가를 처리하지 않은 필터 14가지가 등록되어 있다
     httpBasic() 인증, formLogin() 인증에 따라 필터 수가 달라진다
     httpBasic() : BasicAuthentication
+
+주의사항
+
+    위 소스코드의 @Order 값을 서로 변경하고 클라이언트가 /admin/** 에 대한 요청을 하면
+    인증, 인가처리가 무시된채 리소스에 접근이 가능하게 되는데 그 이유는
+    SecondSecurityConfig 에서 모든 요청에 대해 permitAll() 을 설정하였기 때문에
+    SecurityConfig 의 .anyRequest().authenticated() 설정이 모두 무시되기 때문이다
