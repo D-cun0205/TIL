@@ -30,3 +30,20 @@ AuthenticationManager 의 작업 요청 및 응답 대상 : Filter, Provider
 
 AuthenticationProvider 의 작업 요청 및 응답 대상 : manager, UserDetailsService
 
+컴파일
+
+    Provider 등록은 위 AuthenticationManager 에서 설명과 같음
+
+런타임
+
+    formLogin 인증 방법으로 진행 UsernamePasswordAuthenticationFilter 가 요청을 받은 후
+    Manager 설명에 작성되어있는 방법으로 Provider 등록
+    DaoAuthenticationProvider 의 토큰과 사용자가 전달한 토큰이 같은 객체인지 확인
+    확인 후 retrieveUser 메소드에서 UserDetailsService 에 사용자가 전달한 id(username) 과 같은게 있는지 확인 요청
+    테스트에 사용하는 아이디는 DB 를 사용하지 않으므로 InMemoryUserDetailsManager 에서 확인 후 User 객체 리턴
+    이 때 username 이 없는 사용자인 경우 UserNotFoundException 리턴
+    사용자가 있으면 DaoAuthenticationProvider 에 User 객체를 리턴한다 
+    User 객체를 전달받고 더 필요한 인증이 없는지 additionalAuthenticationCheck 메소드를 확인하고
+    패스워드 체크 진행 패스워드를 암호화하여 서로 비교하고 같지 않으면 BadCredentialException 리턴한다
+    패스워드 검증이 끝나면 다시 추가 검증(사용자가 등록한 검증)이 없는지 확인 후
+    최종적으로 필터에 인증 객체를 전달하고 필터는 SecurityContextHolder 에 저장한다
