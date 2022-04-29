@@ -1,2 +1,3 @@
 # TIL
-Today I Learned
+
+TIL -> https://velog.io/@mmeo0205
