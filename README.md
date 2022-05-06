@@ -1,3 +1,4 @@
-# TIL
 
-TIL -> https://velog.io/@mmeo0205
+github - 소스 코드, velog - TIL
+
+velog -> https://velog.io/@mmeo0205
